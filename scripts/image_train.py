@@ -3,8 +3,8 @@ Train a diffusion model on images.
 """
 
 import argparse
-import torch.distributed as dist
-from entropy_driven_guided_diffusion import dist_util, logger
+import torch
+from entropy_driven_guided_diffusion import logger
 from entropy_driven_guided_diffusion.image_datasets import load_data
 from entropy_driven_guided_diffusion.resample import create_named_schedule_sampler
 from entropy_driven_guided_diffusion.script_util import (
@@ -15,20 +15,18 @@ from entropy_driven_guided_diffusion.script_util import (
 )
 from entropy_driven_guided_diffusion.train_util import TrainLoop
 
-
 def main():
+    device = torch.device('mps' if torch.backends.mps.is_available() else 'cpu')
     args = create_argparser().parse_args()
 
-    dist_util.setup_dist(local_rank=args.local_rank)
     logger.configure(dir=args.log_dir)
-    logger.log('current rank == {}, total_num = {}'.format(dist.get_rank(), dist.get_world_size()))
     logger.log(args)
 
     logger.log("creating model and diffusion...")
     model, diffusion = create_model_and_diffusion(
         **args_to_dict(args, model_and_diffusion_defaults().keys())
     )
-    model.to(dist_util.dev())
+    model.to(device)
     schedule_sampler = create_named_schedule_sampler(args.schedule_sampler, diffusion)
 
     logger.log("creating data loader...")
@@ -57,10 +55,10 @@ def main():
         schedule_sampler=schedule_sampler,
         weight_decay=args.weight_decay,
         lr_anneal_steps=args.lr_anneal_steps,
+        device=device,
         #classifier_free=args.classifier_free,
         #classifier_free_dropout=args.classifier_free_dropout
     ).run_loop()
-
 
 def create_argparser():
     defaults = dict(
@@ -89,7 +87,6 @@ def create_argparser():
     parser.add_argument("--local_rank", type=int, default=0)
     add_dict_to_argparser(parser, defaults)
     return parser
-
 
 if __name__ == "__main__":
     main()

@@ -12,7 +12,7 @@ export MASTER_PORT=29500
 # データとログのディレクトリ設定
 DATA_DIR='datasets/train'
 VAL_DATA_DIR='datasets/val'
-LOG_DIR='logs'
+LOG_DIR='logs/image'
 
 # トレーニング用のパラメータ設定
 IMAGE_SIZE=256

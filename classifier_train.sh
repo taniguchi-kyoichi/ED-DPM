@@ -10,7 +10,7 @@ export MASTER_PORT=29500
 # トレーニング用のパラメータ設定
 DATA_DIR='datasets/train'
 VAL_DATA_DIR='datasets/val'
-LOG_DIR='logs'
+LOG_DIR='logs/class'
 BATCH_SIZE=4
 
 # shellcheck disable=SC2054
