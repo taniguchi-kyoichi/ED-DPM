@@ -22,10 +22,22 @@ def setup_dist(local_rank=0):
     """
     Setup a distributed process group.
     """
+    # Set the device to MPS (Metal Performance Shaders)
+    if th.backends.mps.is_available():
+        th.device("mps")
+        os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
+    else:
+        raise RuntimeError("MPS (Metal) backend is not available on this system.")
 
-    th.cuda.set_device(local_rank)
-    os.environ["CUDA_VISIBLE_DEVICES"] = f"{local_rank}"
-    dist.init_process_group(backend='nccl', init_method="env://")
+    # Set environment variable for distributed training
+    os.environ["RANK"] = str(local_rank)
+    os.environ["WORLD_SIZE"] = "1"  # Update this if running on multiple nodes
+
+    # Avoid using shared memory
+    os.environ["NCCL_SHM_DISABLE"] = "1"
+
+    # Initialize the process group with GLOO backend and TCP init method
+    dist.init_process_group(backend='gloo', init_method="tcp://localhost:23456", rank=local_rank, world_size=1)
 
 
 def dev():
