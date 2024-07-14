@@ -460,7 +460,7 @@ def configure(dir=None, format_strs=None, comm=None, log_suffix=""):
     dir = os.path.expanduser(dir)
     os.makedirs(os.path.expanduser(dir), exist_ok=True)
 
-    rank = dist.get_rank()
+    rank = int(os.getenv("RANK", 0))  # 環境変数からランクを取得
     if rank > 0:
         log_suffix = log_suffix + "-rank%03i" % rank
 

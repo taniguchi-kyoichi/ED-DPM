@@ -6,7 +6,7 @@ from .respace import SpacedDiffusion, space_timesteps
 from .unet import SuperResModel, UNetModel, EncoderUNetModel
 
 
-NUM_CLASSES = 1000
+NUM_CLASSES = 7
 
 
 def diffusion_defaults():
